@@ -24,7 +24,7 @@ class Login {
     // Método para validar el login
     async autenticar(usuario, password) {
         try {
-            const query = 'SELECT id, nombre, password FROM usuarios WHERE usuario = ?';
+            const query = 'SELECT id_usuario AS id, nombre, password FROM usuarios WHERE usuario = ?';
             const [rows] = await this.db.execute(query, [usuario]);
 
             if (rows.length > 0) {

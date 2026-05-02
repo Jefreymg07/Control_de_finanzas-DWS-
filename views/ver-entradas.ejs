@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Entradas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav h1 { color: #fff; font-size: 1.2rem; }
+
+        nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover { color: #3498db; }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .header-row h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            border-left: 4px solid #27ae60;
+            padding-left: 12px;
+        }
+
+        .btn-nueva {
+            background: #27ae60;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-nueva:hover { background: #219a52; }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        thead th {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        tbody tr { border-bottom: 1px solid #f0f0f0; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f9fffe; }
+
+        tbody td {
+            padding: 14px 18px;
+            color: #444;
+            font-size: 0.95rem;
+        }
+
+        .monto { font-weight: 700; color: #27ae60; }
+
+        .factura-thumb {
+            width: 55px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid #eee;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .factura-thumb:hover {
+            transform: scale(1.1);
+            border-color: #27ae60;
+        }
+
+        .sin-facturas {
+            color: #aaa;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #aaa;
+        }
+
+        .empty-state p { font-size: 1rem; margin-bottom: 15px; }
+
+        .total-row td {
+            background: #f0fff4;
+            font-weight: 700;
+            color: #2c3e50;
+            border-top: 2px solid #27ae60;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.activo { display: flex; }
+
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+
+        .lightbox-cerrar {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 2.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .lightbox-cerrar:hover { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>Control de Finanzas</h1>
+        <div>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/registrar-entrada">Registrar Entrada</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-row">
+            <h2>Entradas Registradas</h2>
+            <a href="/registrar-entrada" class="btn-nueva">+ Nueva Entrada</a>
+        </div>
+
+        <div class="card">
+            <% if (entradas.length === 0) { %>
+                <div class="empty-state">
+                    <p>No hay entradas registradas aún.</p>
+                    <a href="/registrar-entrada" class="btn-nueva">Registrar primera entrada</a>
+                </div>
+            <% } else { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                            <th>Factura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% let total = 0; %>
+                        <% entradas.forEach((entrada, index) => { %>
+                            <% total += parseFloat(entrada.monto); %>
+                            <tr>
+                                <td><%= index + 1 %></td>
+                                <td><%= entrada.tipo_entrada %></td>
+                                <td class="monto">$<%= parseFloat(entrada.monto).toFixed(2) %></td>
+                                <td><%= new Date(entrada.fecha).toLocaleDateString('es-SV') %></td>
+                                <td>
+                                    <% if (entrada.factura) { %>
+                                        <img
+                                            src="<%= entrada.factura %>"
+                                            alt="Factura"
+                                            class="factura-thumb"
+                                            onclick="abrirLightbox(this.src)"
+                                        >
+                                    <% } else { %>
+                                        <span class="sin-facturas">Sin imagen</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                        <tr class="total-row">
+                            <td colspan="2">TOTAL</td>
+                            <td class="monto">$<%= total.toFixed(2) %></td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Lightbox para ver facturas en grande -->
+    <div class="lightbox" id="lightbox" onclick="cerrarLightbox()">
+        <span class="lightbox-cerrar" onclick="cerrarLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="Factura en grande">
+    </div>
+
+    <script>
+        function abrirLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.add('activo');
+        }
+
+        function cerrarLightbox() {
+            document.getElementById('lightbox').classList.remove('activo');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') cerrarLightbox();
+        });
+    </script>
+
+</body>
+</html>

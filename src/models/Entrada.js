@@ -12,6 +12,26 @@ class Entrada {
     static fromRow(row) {
         return new Entrada(row);
     }
+
+    async guardar(pool) {
+        const sql = `INSERT INTO entradas (tipo_entrada, monto, fecha, factura, id_usuario)
+                     VALUES (?, ?, ?, ?, ?)`;
+        const [result] = await pool.execute(sql, [
+            this.tipo_entrada,
+            this.monto,
+            this.fecha,
+            this.factura,
+            this.id_usuario
+        ]);
+        this.id_entrada = result.insertId;
+        return this;
+    }
+
+    static async obtenerTodas(pool, id_usuario) {
+        const sql = `SELECT * FROM entradas WHERE id_usuario = ? ORDER BY fecha DESC`;
+        const [rows] = await pool.execute(sql, [id_usuario]);
+        return rows.map(row => Entrada.fromRow(row));
+    }
 }
 
 module.exports = Entrada;

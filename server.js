@@ -1,11 +1,33 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const multer = require('multer');
 const pool = require('./src/config/db');
 const Login = require('./src/models/Login');
+const Entrada = require('./src/models/Entrada');
 
 const app = express();
 const loginModel = new Login(pool);
+
+// Configuración de multer para guardar facturas de entradas
+const storageEntradas = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, 'public', 'uploads', 'entradas'));
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `entrada_${Date.now()}${ext}`);
+    }
+});
+const fileFilterImagenes = (req, file, cb) => {
+    const extensionesPermitidas = /\.(jpg|jpeg|png|gif)$/i;
+    if (extensionesPermitidas.test(path.extname(file.originalname))) {
+        cb(null, true);
+    } else {
+        cb(new Error('Solo se permiten imágenes (jpg, jpeg, png, gif)'));
+    }
+};
+const uploadEntrada = multer({ storage: storageEntradas, fileFilter: fileFilterImagenes });
 
 // --- CONFIGURACIÓN ---
 app.set('view engine', 'ejs');
@@ -70,6 +92,37 @@ app.get('/dashboard', (req, res) => {
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
+});
+
+// --- RUTAS DE ENTRADAS (Persona 3) ---
+
+// 7. Mostrar formulario Registrar Entrada
+app.get('/registrar-entrada', (req, res) => {
+    if (!req.session.userId) return res.redirect('/');
+    res.render('registrar-entrada', { error: null });
+});
+
+// 8. Procesar formulario Registrar Entrada
+app.post('/registrar-entrada', (req, res) => {
+    if (!req.session.userId) return res.redirect('/');
+
+    uploadEntrada.single('factura')(req, res, async (err) => {
+        if (err) {
+            return res.render('registrar-entrada', { error: err.message });
+        }
+        const { tipo_entrada, monto, fecha } = req.body;
+        const rutaFactura = req.file ? `/uploads/entradas/${req.file.filename}` : '';
+        const entrada = new Entrada({ tipo_entrada, monto, fecha, factura: rutaFactura, id_usuario: req.session.userId });
+        await entrada.guardar(pool);
+        res.redirect('/ver-entradas');
+    });
+});
+
+// 9. Ver todas las entradas del usuario
+app.get('/ver-entradas', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/');
+    const entradas = await Entrada.obtenerTodas(pool, req.session.userId);
+    res.render('ver-entradas', { entradas });
 });
 
 // --- INICIAR SERVIDOR ---

@@ -1,0 +1,8 @@
+context.md
+indicaciones.pdf
+node_modules/
+.env
+
+# Archivos subidos por usuarios
+public/uploads/entradas/*
+!public/uploads/entradas/.gitkeep

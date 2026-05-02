@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://kit.fontawesome.com/1a64ad139b.js" crossorigin="anonymous"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+        nav {
+            background: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        nav h1 { color: #fff; font-size: 1.2rem; }
+        nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.9rem;
+        }
+        nav a:hover { color: #3498db; }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .bienvenida {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .bienvenida h2 { color: #2c3e50; font-size: 1.6rem; }
+        .bienvenida p { color: #888; margin-top: 8px; }
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+        }
+        .menu-item {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 30px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #2c3e50;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 4px solid #3498db;
+        }
+        .menu-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        .menu-item .icono { font-size: 2.2rem; margin-bottom: 10px; }
+        .menu-item span { display: block; font-weight: 600; font-size: 0.95rem; }
+        .menu-item:nth-child(1) { border-color: #27ae60; }
+        .menu-item:nth-child(2) { border-color: #e74c3c; }
+        .menu-item:nth-child(3) { border-color: #27ae60; }
+        .menu-item:nth-child(4) { border-color: #e74c3c; }
+        .menu-item:nth-child(5) { border-color: #f39c12; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>Control de Finanzas</h1>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+
+    <div class="container">
+        <div class="bienvenida">
+            <h2>Bienvenido, <%= nombre %></h2>
+            <p>Selecciona una opción del menú para continuar</p>
+        </div>
+
+        <div class="menu">
+            <a href="/registrar-entrada" class="menu-item">
+                <div class="icono"><i class="fa-solid fa-arrow-down"></i></div>
+                <span>Registrar Entrada</span>
+            </a>
+            <a href="/registrar-salida" class="menu-item">
+                <div class="icono"><i class="fa-solid fa-arrow-up"></i></div>
+                <span>Registrar Salida</span>
+            </a>
+            <a href="/ver-entradas" class="menu-item">
+                <div class="icono"><i class="fa-solid fa-list"></i></div>
+                <span>Ver Entradas</span>
+            </a>
+            <a href="/ver-salidas" class="menu-item">
+                <div class="icono"><i class="fa-solid fa-list"></i></div>
+                <span>Ver Salidas</span>
+            </a>
+            <a href="/balance" class="menu-item">
+                <div class="icono"><i class="fa-solid fa-chart-pie"></i></div>
+                <span>Mostrar Balance</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
