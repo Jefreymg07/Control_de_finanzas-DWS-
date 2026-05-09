@@ -6,3 +6,5 @@ node_modules/
 # Archivos subidos por usuarios
 public/uploads/entradas/*
 !public/uploads/entradas/.gitkeep
+public/uploads/salidas/*
+!public/uploads/salidas/.gitkeep

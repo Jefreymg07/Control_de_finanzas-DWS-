@@ -130,3 +130,47 @@ const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+// --- RUTAS DE SALIDAS (Persona 4) ---
+
+const Salida = require('./src/models/Salida'); // Importar el modelo
+
+const storageSalidas = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, 'public', 'uploads', 'salidas'));
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `salida_${Date.now()}${ext}`);
+    }
+});
+const uploadSalida = multer({ storage: storageSalidas, fileFilter: fileFilterImagenes });
+
+// Mostrar formulario Registrar Salida
+app.get('/registrar-salida', (req, res) => {
+    if (!req.session.userId) return res.redirect('/');
+    res.render('registrar-salida', { error: null });
+});
+
+// Procesar formulario Registrar Salida
+app.post('/registrar-salida', (req, res) => {
+    if (!req.session.userId) return res.redirect('/');
+
+    uploadSalida.single('factura')(req, res, async (err) => {
+        if (err) {
+            return res.render('registrar-salida', { error: err.message });
+        }
+        const { tipo_salida, monto, fecha } = req.body;
+        const rutaFactura = req.file ? `/uploads/salidas/${req.file.filename}` : '';
+        const salida = new Salida({ tipo_salida, monto, fecha, factura: rutaFactura, id_usuario: req.session.userId });
+        await salida.guardar(pool);
+        res.redirect('/ver-salidas');
+    });
+});
+
+// Ver todas las salidas
+app.get('/ver-salidas', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/');
+    const salidas = await Salida.obtenerTodas(pool, req.session.userId);
+    res.render('ver-salidas', { salidas });
+});
