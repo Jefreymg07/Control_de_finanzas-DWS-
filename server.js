@@ -5,6 +5,7 @@ const multer = require('multer');
 const pool = require('./src/config/db');
 const Login = require('./src/models/Login');
 const Entrada = require('./src/models/Entrada');
+const balanceRoutes = require('./src/models/Balance');
 
 const app = express();
 const loginModel = new Login(pool);
@@ -28,6 +29,8 @@ const fileFilterImagenes = (req, file, cb) => {
     }
 };
 const uploadEntrada = multer({ storage: storageEntradas, fileFilter: fileFilterImagenes });
+const Balance = require('./src/models/Balance');
+const balanceModel = new Balance(pool);
 
 // --- CONFIGURACIÓN ---
 app.set('view engine', 'ejs');
@@ -92,6 +95,28 @@ app.get('/dashboard', (req, res) => {
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
+});
+
+// 7. Dashboard Balance
+app.get('/mostrar-balance', async (req, res) => {
+    // Verificación de sesión
+    if (!req.session.userId) {
+        return res.redirect('/');
+    }
+
+    const reporte = await balanceModel.obtenerReporteCompleto(req.session.userId);
+
+    if (reporte.success) {
+        res.render('mostrar-balance', {
+            entradas: reporte.entradas,
+            salidas: reporte.salidas,
+            totalEntradas: reporte.totalEntradas,
+            totalSalidas: reporte.totalSalidas,
+            balance: reporte.balance
+        });
+    } else {
+        res.status(500).send("Error al procesar los datos financieros.");
+    }
 });
 
 // --- RUTAS DE ENTRADAS (Persona 3) ---
